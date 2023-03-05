@@ -32,7 +32,7 @@
                             <input type="number" class="form-control" name="page-to" placeholder="số page (10)">
                             <button class="btn btn-primary" type="button" id="page-from-to">Thực Hiện</button>
                         </div>
-                        <p class="fst-italic fs-6 my-1">Hoặc crawl theo link film chi tiết:</p>
+                        <p class="fst-italic fs-6 my-1">Hoặc crawl theo link film API chi tiết:</p>
                         <div class="input-group mb-2">
                             <span class="input-group-text">Nhập vào link phim</span>
                             <input type="text" class="form-control" id="onemovie-link" placeholder="https://ophim1.com/phim/ngoi-truong-xac-song">
@@ -234,7 +234,7 @@
                     },
                     success: function(response) {
                         let data = (response);
-                        console.log(data.response);
+                        console.log((data.message));
                         if (data.code > 1) {
                             alertBoxShow();
                             alertBox.removeClass().addClass("alert alert-danger");

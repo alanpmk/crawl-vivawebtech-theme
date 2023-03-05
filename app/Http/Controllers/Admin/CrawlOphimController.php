@@ -73,12 +73,11 @@ class CrawlOphimController extends MainAdminController
     {
         try {
             //Call api to get films info by id
-            $host_name = $request->origin;
+            $host_name = 'http://ophim1.com/';
             $path_name = $request->api;
             $full_url = $host_name.$path_name;
             $response = Http::get($full_url);
-            $data = json_decode($response, true);
-            // return $data;
+            $data = json_decode($response->body(), true);
             if (!$data['status']) {
                 return response()->json(['code' => 999, 'message' => 'Mẫu JSON không đúng, không hỗ trợ thu thập']);
             }
