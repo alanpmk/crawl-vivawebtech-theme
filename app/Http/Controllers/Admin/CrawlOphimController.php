@@ -15,6 +15,7 @@ use DateTime;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class CrawlOphimController extends MainAdminController
 {
@@ -81,8 +82,8 @@ class CrawlOphimController extends MainAdminController
             if (!$data['status']) {
                 return response()->json(['code' => 999, 'message' => 'Mẫu JSON không đúng, không hỗ trợ thu thập']);
             }
+            // return $this->save_image_from_url($data['movie']['thumb_url']);
             $movie_data = $this->refined_data($data);
-            // return $movie_data;
             if ($movie_data['type'] === "single" && intval($movie_data['episode_total']) === 1 ) { //single_movie
                 // Check duplicated from database
                 $check_movie_duplicate = Movies::where('imdb_votes', '=', $movie_data['_id'])->first();
@@ -409,13 +410,30 @@ class CrawlOphimController extends MainAdminController
     private function save_image_from_url($url)
     {
         $url = str_replace('https://', 'http://', $url);
-        $img_name = pathinfo($url)['basename'];
+        $img_name = pathinfo($url)['filename'].'.webp';
         if ($this->check_duplicate_img($img_name, 'images')) {
             return 'upload/images/' . $img_name;
         }
-        $content = file_get_contents($url);
-        $save_img = Storage::disk('images')->put($img_name, $content);
-        if ($save_img) {
+        $imageResize  = Image::make($url)->encode('webp',70);
+        $imageWidth = $imageResize->width();
+        $imageHeight = $imageResize->height();
+        if($imageWidth > 1024 || $imageHeight > 1024) {
+            if($imageWidth > $imageHeight) {
+                $imageResize->resize(1024,null,function($constraint){
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+            }
+            else {
+                $imageResize->resize(null, 1024, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+            }
+        }
+        $destinationPath = public_path('upload/images/');
+        $imageResize->save($destinationPath. $img_name);
+        if ($imageResize) {
             return 'upload/images/' . $img_name;
         } else {
             return '';

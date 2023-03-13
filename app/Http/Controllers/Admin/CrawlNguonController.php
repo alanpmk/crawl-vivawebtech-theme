@@ -14,6 +14,8 @@ use App\Series;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManagerStatic as Image;
+
 
 class CrawlNguonController extends MainAdminController
 {
@@ -526,13 +528,29 @@ class CrawlNguonController extends MainAdminController
     private function save_image_from_url($url)
     {
         $url = str_replace('https://', 'http://', $url);
-        $img_name = pathinfo($url)['basename'];
+        $img_name = pathinfo($url)['filename'] . '.webp';
         if ($this->check_duplicate_img($img_name, 'images')) {
             return 'upload/images/' . $img_name;
         }
-        $content = file_get_contents($url);
-        $save_img = Storage::disk('images')->put($img_name, $content);
-        if ($save_img) {
+        $imageResize  = Image::make($url)->encode('webp', 70);
+        $imageWidth = $imageResize->width();
+        $imageHeight = $imageResize->height();
+        if ($imageWidth > 1024 || $imageHeight > 1024) {
+            if ($imageWidth > $imageHeight) {
+                $imageResize->resize(1024, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+            } else {
+                $imageResize->resize(null, 1024, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+            }
+        }
+        $destinationPath = public_path('upload/images/');
+        $imageResize->save($destinationPath . $img_name);
+        if ($imageResize) {
             return 'upload/images/' . $img_name;
         } else {
             return '';
