@@ -35,7 +35,7 @@
                         <p class="fst-italic fs-6 my-1">Hoặc crawl theo link film API chi tiết:</p>
                         <div class="input-group mb-2">
                             <span class="input-group-text">Nhập vào link phim</span>
-                            <input type="text" class="form-control" id="onemovie-link" placeholder="https://ophim1.com/phim/ngoi-truong-xac-song">
+                            <input type="text" class="form-control" id="onemovie-link" placeholder="https://ophim1.com/phim/ngoi-truong-xac-song" value="https://ophim1.cc/phim/bungo-stray-dogs-4">
                             <button class="btn btn-success" type="button" id="onemovie-crawl">Thu Thập Ngay</button>
                         </div>
                     </div>
@@ -222,7 +222,6 @@
                     return false;
                 }
                 oneLink = new URL(oneLink);
-                console.log(oneLink);
                 let pathName = oneLink.pathname;
                 let origin = oneLink.origin;
                 $.ajax({
@@ -234,7 +233,6 @@
                     },
                     success: function(response) {
                         let data = (response);
-                        console.log((data.message));
                         if (data.code > 1) {
                             alertBoxShow();
                             alertBox.removeClass().addClass("alert alert-danger");

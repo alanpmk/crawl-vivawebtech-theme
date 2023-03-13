@@ -83,7 +83,7 @@ class CrawlOphimController extends MainAdminController
             }
             $movie_data = $this->refined_data($data);
             // return $movie_data;
-            if ($movie_data['type'] === "single" || intval($movie_data['episode_total']) === 1 ) { //single_movie
+            if ($movie_data['type'] === "single" && intval($movie_data['episode_total']) === 1 ) { //single_movie
                 // Check duplicated from database
                 $check_movie_duplicate = Movies::where('imdb_votes', '=', $movie_data['_id'])->first();
                 if ($check_movie_duplicate) {
@@ -103,8 +103,10 @@ class CrawlOphimController extends MainAdminController
                 //Check duplicated from database
                 $check_series = Series::where('imdb_votes', '=', $movie_data['_id'])->first();
                 if ($check_series) { // duplicated
-                    // Update movies
                     $check_season = Season::where('series_id', '=', $check_series['id'])->first();
+                    //Update series
+                    $this->update_series($movie_data,$check_series['id']);
+                    // Update movies
                     $this->update_episodes($movie_data, $check_series['id'], $check_season['id']);
                     return response()->json(array(
                         'code' => 1,
@@ -210,6 +212,12 @@ class CrawlOphimController extends MainAdminController
         $series_obj->imdb_votes = $data['_id']; //Save Ophim movie_id to imdb_votes column
         $series_obj->save();
         return $series_obj;
+    }
+    private function update_series($data) {
+        $series = Series::where('imdb_votes', '=', $data['_id'])->first();
+        $series->update(['series_poster'=>$data['poster_url']]);
+        Season::where('series_id','=',$series->id)->update(['season_poster'=>$series->series_poster]);
+        return $series;
     }
 
     /**
@@ -393,8 +401,8 @@ class CrawlOphimController extends MainAdminController
     {
         $movie_data = $array_data['movie'];
         $movie_data['server_data'] = $array_data['episodes'][0]['server_data'];
-        $movie_data['thumb_url'] = $this->save_image_from_url($movie_data['thumb_url']);
-        $movie_data['poster_url'] = $this->save_image_from_url($movie_data['poster_url']);
+        $movie_data['thumb_url'] = $this->save_image_from_url($array_data['movie']['thumb_url']);
+        $movie_data['poster_url'] = $array_data['movie']['poster_url'] !== "" ? $this->save_image_from_url($array_data['movie']['poster_url']) : $movie_data['thumb_url'];
         return $movie_data;
     }
 
