@@ -1,109 +1,143 @@
-@extends("admin.admin_app")
+@extends('admin.admin_app')
 
-@section("content")
-  <div class="content-page">
-      <div class="content">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12">
-              <div class="card-box table-responsive">
+@section('content')
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card-box table-responsive">
 
 
-<div class="container-lg mt-4">
-    <div class="container text-white">
-        <div class="row justify-content-center">
-            <div class="col">
-                <div class="card-md">
-                    <div class="card-header text-center h3">Ophim Crawler</div>
-                    <div class="card-body">
-                        <div class="input-group mb-3">
-                            <input type="hidden" id="plugin_path" name="plugin_path" value="">
-                        </div>
-                        <div id="alert-box" class="alert" style="display: none;" role="alert"></div>
-                        <div class="input-group  mb-4">
-                            <span class="input-group-text">Nhập vào JSON API</span>
-                            <input type="text" class="form-control" id="jsonapi-url" value="https://ophim1.com/danh-sach/phim-moi-cap-nhat" placeholder="https://ophim1.com/danh-sach/phim-moi-cap-nhat">
-                            <button class="btn btn-primary" type="button" id="ophim-api-check">Kiểm Tra</button>
-                        </div>
-                             <div class="input-group mb-3">
-                            <span class="input-group-text">Thu thập từ Page</span>
-                            <input type="number" class="form-control" name="page-from" placeholder="số page (1)">
-                            <span class="input-group-text">Đến Page</span>
-                            <input type="number" class="form-control" name="page-to" placeholder="số page (10)">
-                            <button class="btn btn-primary" type="button" id="page-from-to">Thực Hiện</button>
-                        </div>
-                        <p class="fst-italic fs-6 my-1">Hoặc crawl theo link film API chi tiết:</p>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text">Nhập vào link phim</span>
-                            <input type="text" class="form-control" id="onemovie-link" placeholder="https://ophim1.com/phim/ngoi-truong-xac-song" value="https://ophim1.cc/phim/bungo-stray-dogs-4">
-                            <button class="btn btn-success" type="button" id="onemovie-crawl">Thu Thập Ngay</button>
-                        </div>
-                    </div>
-                    <div id="content" class="card-body pt-0">
+                            <div class="container-lg mt-4">
+                                <div class="container text-white">
+                                    <div class="row justify-content-center">
+                                        <div class="col">
+                                            <div class="card-md">
+                                                <div class="card-header text-center h3">Ophim Crawler</div>
+                                                <div class="card-body">
+                                                    <div class="input-group mb-3">
+                                                        <input type="hidden" id="plugin_path" name="plugin_path"
+                                                            value="">
+                                                    </div>
+                                                    <div id="alert-box" class="alert" style="display: none;"
+                                                        role="alert"></div>
+                                                    <div class="input-group  mb-4">
+                                                        <span class="input-group-text">Nhập vào JSON API</span>
+                                                        <input type="text" class="form-control" id="jsonapi-url"
+                                                            value="https://ophim1.com/danh-sach/phim-moi-cap-nhat"
+                                                            placeholder="https://ophim1.com/danh-sach/phim-moi-cap-nhat">
+                                                        <button class="btn btn-primary" type="button"
+                                                            id="ophim-api-check">Kiểm Tra</button>
+                                                    </div>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text">Thu thập từ Page</span>
+                                                        <input type="number" class="form-control" name="page-from"
+                                                            placeholder="số page (1)">
+                                                        <span class="input-group-text">Đến Page</span>
+                                                        <input type="number" class="form-control" name="page-to"
+                                                            placeholder="số page (10)">
+                                                        <button class="btn btn-primary" type="button"
+                                                            id="page-from-to">Thực Hiện</button>
+                                                    </div>
+                                                    <p class="fst-italic fs-6 my-1">Hoặc crawl theo link film API chi tiết:
+                                                    </p>
+                                                    <div class="input-group mb-2">
+                                                        <span class="input-group-text">Nhập vào link phim</span>
+                                                        <input type="text" class="form-control" id="onemovie-link"
+                                                            placeholder="https://ophim1.com/phim/ngoi-truong-xac-song"
+                                                            value="https://ophim1.cc/phim/bungo-stray-dogs-4">
+                                                        <button class="btn btn-success" type="button"
+                                                            id="onemovie-crawl">Thu Thập Ngay</button>
+                                                    </div>
+                                                </div>
+                                                <div id="content" class="card-body pt-0">
 
-                        <div class="card-title">Thông Tin Nguồn Phim: </div>
-                        <ul id="server-info" class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Tổng số bộ phim
-                                <span id="movies-total" class="badge bg-primary rounded-pill"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Tổng số page
-                                <span id="last-page" class="badge bg-primary rounded-pill"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Cập nhật hôm nay
-                                <span id="update-today" class="badge bg-primary rounded-pill"></span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div id="movies-list" class="card-body" style="display: none;">
-                        <div class="card-title" id="current-page-crawl">
-                            <h4 id="h4-current-page" class="position-absolute">Page 1</h4>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end me-5">
-                                <button id="pause-crawl" type="button" class="btn btn-danger mr-2">Dừng</button>
-                                <button id="resume-crawl" type="button" class="btn btn-success">Tiếp tục</button>
+                                                    <div class="card-title">Thông Tin Nguồn Phim: </div>
+                                                    <ul id="server-info" class="list-group">
+                                                        <li
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                                            Tổng số bộ phim
+                                                            <span id="movies-total"
+                                                                class="badge bg-primary rounded-pill"></span>
+                                                        </li>
+                                                        <li
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                                            Tổng số page
+                                                            <span id="last-page"
+                                                                class="badge bg-primary rounded-pill"></span>
+                                                        </li>
+                                                        <li
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                                            Cập nhật hôm nay
+                                                            <span id="update-today"
+                                                                class="badge bg-primary rounded-pill"></span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div id="movies-list" class="card-body" style="display: none;">
+                                                    <div class="card-title" id="current-page-crawl">
+                                                        <h4 id="h4-current-page" class="position-absolute">Page 1</h4>
+                                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end me-5">
+                                                            <button id="pause-crawl" type="button"
+                                                                class="btn btn-danger mr-2">Dừng</button>
+                                                            <button id="resume-crawl" type="button"
+                                                                class="btn btn-success">Tiếp tục</button>
+                                                        </div>
+                                                    </div>
+                                                    <table class="table" id="movies-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">ID</th>
+                                                                <th scope="col">Tên Phim</th>
+                                                                {{-- <th scope="col">Thể Loại</th> --}}
+                                                                <th scope="col">Cập nhật</th>
+                                                                <th scope="col">Quá trình</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <button id="roll-crawl" type="button"
+                                                        class="btn btn-success position-absolute">Trộn Link</button>
+                                                    <div class="d-grid d-md-flex justify-content-md-end">
+                                                        <button id="selected-crawl" type="button"
+                                                            class="btn btn-success mr-2">Thu Thập Page</button>
+                                                        <button id="update-crawl" type="button"
+                                                            class="btn btn-success mr-2">Thu Thập Hôm Nay</button>
+                                                        <button id="full-crawl" type="button"
+                                                            class="btn btn-primary">Thu Thập Toàn Bộ</button>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer mt-4">
+                                                    <h5>Tham gia nhóm trao đổi chia sẻ: <a target="_blank"
+                                                            href="https://t.me/+QMfjBOtNpkZmNTc1">Ophim Telegram.</a></h5>
+                                                    <p><a href="https://ophim1.cc/">Ophim.cc</a> là website dữ liệu phim
+                                                        miễn phí vĩnh viễn. Cập nhật nhanh, chất lượng cao, ổn định và lâu
+                                                        dài. Tốc độ phát cực nhanh với đường truyền băng thông cao, đảm bảo
+                                                        đáp ứng được lượng xem phim trực tuyến lớn. Đồng thời giúp nhà phát
+                                                        triển website phim giảm thiểu chi phí của các dịch vụ lưu trữ và
+                                                        stream. <br />Hàng ngày chạy tools tầm 10 đến 20 pages đầu (tùy số
+                                                        lượng phim được cập nhật trong ngày) để update tập mới hoặc thêm
+                                                        phim mới!.<br />Trộn link vài lần để thay đổi thứ tự crawl & update.
+                                                        Giúp tránh việc quá giống nhau về content của các website!.<br />
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
-                        <table class="table" id="movies-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Tên Phim</th>
-                                    {{-- <th scope="col">Thể Loại</th> --}}
-                                    <th scope="col">Cập nhật</th>
-                                    <th scope="col">Quá trình</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer">
-                        <button id="roll-crawl" type="button" class="btn btn-success position-absolute">Trộn Link</button>
-                        <div class="d-grid d-md-flex justify-content-md-end">
-                            <button id="selected-crawl" type="button" class="btn btn-success mr-2" >Thu Thập Page</button>
-                            <button id="update-crawl" type="button" class="btn btn-success mr-2">Thu Thập Hôm Nay</button>
-                            <button id="full-crawl" type="button" class="btn btn-primary">Thu Thập Toàn Bộ</button>
-                        </div>
-                    </div>
-                    <div class="card-footer mt-4">
-                        <h5>Tham gia nhóm trao đổi chia sẻ: <a target="_blank" href="https://t.me/+QMfjBOtNpkZmNTc1">Ophim Telegram.</a></h5>
-                        <p><a href="https://ophim1.cc/">Ophim.cc</a> là website dữ liệu phim miễn phí vĩnh viễn. Cập nhật nhanh, chất lượng cao, ổn định và lâu dài. Tốc độ phát cực nhanh với đường truyền băng thông cao, đảm bảo đáp ứng được lượng xem phim trực tuyến lớn. Đồng thời giúp nhà phát triển website phim giảm thiểu chi phí của các dịch vụ lưu trữ và stream. <br />Hàng ngày chạy tools tầm 10 đến 20 pages đầu (tùy số lượng phim được cập nhật trong ngày) để update tập mới hoặc thêm phim mới!.<br />Trộn link vài lần để thay đổi thứ tự crawl & update. Giúp tránh việc quá giống nhau về content của các website!.<br /></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
- <script type="text/javascript">
+    <script type="text/javascript">
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -151,9 +185,9 @@
             buttonCheckApi.click(function(e) {
                 e.preventDefault();
                 apiUrl = $("#jsonapi-url").val();
-                 oneLink = new URL(apiUrl);
-                 let pathname = oneLink.pathname;
-                 host = oneLink.origin;
+                oneLink = new URL(apiUrl);
+                let pathname = oneLink.pathname;
+                host = oneLink.origin;
                 if (!apiUrl) {
                     alertBoxShow();
                     alertBox.removeClass().addClass("alert alert-danger");
@@ -170,7 +204,7 @@
                     url: "{{ route('crawlophim.check') }}",
                     data: {
                         pathname: pathname,
-                        origin:host
+                        origin: host
                     },
                     success: function(response) {
                         buttonCheckApi.html(`Kiểm Tra`);
@@ -187,7 +221,7 @@
                             buttonPageFromTo.prop("disabled", false);
                             buttonSelectedCrawl.prop("disabled", false);
                             latestPageList = data.latest_list_page;
-                            fullPageList = data.full_list_page
+                            fullPageList = data.full_list_page.reverse();
                             maxPageTo = data.last_page;
                             $("#movies-total").html(data.total);
                             $("#last-page").html(data.last_page);
@@ -214,8 +248,8 @@
                     return false;
 
                 }
-                if(!isValidUrl(oneLink)) {
-                  alertBoxShow();
+                if (!isValidUrl(oneLink)) {
+                    alertBoxShow();
                     alertBox.removeClass().addClass("alert alert-danger");
                     alertBox.html("Link phim không đúng");
                     buttonOneCrawl.html("Thu Thập Ngay");
@@ -380,10 +414,10 @@
                             alertBox.removeClass().addClass("alert alert-danger");
                             alertBox.html(data.message);
                         } else {
-                          let mIdList = [];
-                          $.each(data.movies, function(idx, movie) {
-                            mIdList.push(movie.slug);
-                          });
+                            let mIdList = [];
+                            $.each(data.movies, function(idx, movie) {
+                                mIdList.push(movie.slug);
+                            });
                             crawl_movie_by_id(mIdList, data.movies);
                         }
                     },
@@ -408,7 +442,7 @@
                     type: "POST",
                     url: "{{ route('crawlophim.crawl_one') }}",
                     data: {
-                        api: '/phim/'+id,
+                        api: '/phim/' + id,
                         origin: host
                     },
                     success: function(response) {
@@ -437,7 +471,7 @@
                     $id = movie._id.substr(20);
                     $time = movie.modified.time.split("T");
                     trHTML +=
-                    `<tr id="${movie.slug}">
+                        `<tr id="${movie.slug}">
                     <td>${$id}</td>
                     <td>${movie.name}</td>
                     <td>${$time[0]}</td>
@@ -472,7 +506,7 @@
                 return !!urlPattern.test(urlString);
             }
         })
-</script>
-@include("admin.copyright")
-</div>
+    </script>
+    @include('admin.copyright')
+    </div>
 @endsection
