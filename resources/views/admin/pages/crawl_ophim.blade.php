@@ -303,7 +303,7 @@
                 for (let i = parseInt(pageFrom); i <= pageTo; i++) {
                     pages.push(i);
                 }
-                pageFromToList = pages;
+                pageFromToList = pages.reverse();
                 alertBoxShow();
                 alertBox.removeClass().addClass("alert alert-success");
                 alertBox.html(`Cập nhật số page thành công: ${pageFrom} tới ${pageTo}`);
