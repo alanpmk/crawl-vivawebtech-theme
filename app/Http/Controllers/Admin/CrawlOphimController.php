@@ -84,7 +84,7 @@ class CrawlOphimController extends MainAdminController
             }
             // return $this->save_image_from_url($data['movie']['thumb_url']);
             $movie_data = $this->refined_data($data);
-            if ($movie_data['type'] === "single" && intval($movie_data['episode_total']) === 1 ) { //single_movie
+            if ($movie_data['type'] === "single" || intval($movie_data['episode_total']) === 1 ) { //single_movie
                 // Check duplicated from database
                 $check_movie_duplicate = Movies::where('imdb_votes', '=', $movie_data['_id'])->first();
                 if ($check_movie_duplicate) {
@@ -401,6 +401,12 @@ class CrawlOphimController extends MainAdminController
     private function refined_data($array_data)
     {
         $movie_data = $array_data['movie'];
+        if ($movie_data['type'] == 'hoathinh') {
+            array_push($movie_data['category'], (array)["name" => "Hoạt Hình"]);
+        }
+        if ($movie_data['type'] == 'tvshows') {
+            array_push($movie_data['category'], (array)["name" => "TV Shows"]);
+        }
         $movie_data['server_data'] = $array_data['episodes'][0]['server_data'];
         $movie_data['thumb_url'] = $this->save_image_from_url($array_data['movie']['thumb_url']);
         $movie_data['poster_url'] = $array_data['movie']['poster_url'] !== "" ? $this->save_image_from_url($array_data['movie']['poster_url']) : $movie_data['thumb_url'];
