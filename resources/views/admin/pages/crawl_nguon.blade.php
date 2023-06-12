@@ -14,7 +14,7 @@
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card-md">
-                    <div class="card-header text-center h3">NguonTV Crawler</div> <div class="nguon-loader" style="height: 1.5rem;width: 1.5rem"></div>
+                    <div class="card-header text-center h3">NguonTV Crawler ( đã dừng hoạt động )</div> <div class="nguon-loader" style="height: 1.5rem;width: 1.5rem"></div>
                     <div class="card-body">
                         <div class="input-group mb-3">
                             <input type="hidden" id="plugin_path" name="plugin_path" value="">

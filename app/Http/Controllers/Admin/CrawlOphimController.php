@@ -76,7 +76,7 @@ class CrawlOphimController extends MainAdminController
             //Call api to get films info by id
             $host_name = 'http://ophim1.com/';
             $path_name = $request->api;
-            $full_url = $host_name.$path_name;
+            $full_url = $host_name . $path_name;
             $response = Http::get($full_url);
             $data = json_decode($response->body(), true);
             if (!$data['status']) {
@@ -84,7 +84,7 @@ class CrawlOphimController extends MainAdminController
             }
             // return $this->save_image_from_url($data['movie']['thumb_url']);
             $movie_data = $this->refined_data($data);
-            if ($movie_data['type'] === "single" || intval($movie_data['episode_total']) === 1 ) { //single_movie
+            if ($movie_data['type'] === "single" || intval($movie_data['episode_total']) === 1) { //single_movie
                 // Check duplicated from database
                 $check_movie_duplicate = Movies::where('imdb_votes', '=', $movie_data['_id'])->first();
                 if ($check_movie_duplicate) {
@@ -98,7 +98,7 @@ class CrawlOphimController extends MainAdminController
                 $this->insert_movie($movie_data);
                 return response()->json(array(
                     'code' => 1,
-                    'message' => $movie_data['name']  . ' thể loại '. $movie_data['type'] . ' : Thu thập thành công.',
+                    'message' => $movie_data['name']  . ' thể loại ' . $movie_data['type'] . ' : Thu thập thành công.',
                 ));
             } else { // series_movies
                 //Check duplicated from database
@@ -106,7 +106,7 @@ class CrawlOphimController extends MainAdminController
                 if ($check_series) { // duplicated
                     $check_season = Season::where('series_id', '=', $check_series['id'])->first();
                     //Update series
-                    $this->update_series($movie_data,$check_series['id']);
+                    $this->update_series($movie_data, $check_series['id']);
                     // Update movies
                     $this->update_episodes($movie_data, $check_series['id'], $check_season['id']);
                     return response()->json(array(
@@ -214,10 +214,11 @@ class CrawlOphimController extends MainAdminController
         $series_obj->save();
         return $series_obj;
     }
-    private function update_series($data) {
+    private function update_series($data)
+    {
         $series = Series::where('imdb_votes', '=', $data['_id'])->first();
-        $series->update(['series_poster'=>$data['poster_url']]);
-        Season::where('series_id','=',$series->id)->update(['season_poster'=>$series->series_poster]);
+        $series->update(['series_poster' => $data['poster_url']]);
+        Season::where('series_id', '=', $series->id)->update(['season_poster' => $series->series_poster]);
         return $series;
     }
 
@@ -408,37 +409,58 @@ class CrawlOphimController extends MainAdminController
             array_push($movie_data['category'], (array)["name" => "TV Shows"]);
         }
         $movie_data['server_data'] = $array_data['episodes'][0]['server_data'];
+        //save thumbnail
         $movie_data['thumb_url'] = $this->save_image_from_url($array_data['movie']['thumb_url']);
+        //save poster
         $movie_data['poster_url'] = $array_data['movie']['poster_url'] !== "" ? $this->save_image_from_url($array_data['movie']['poster_url']) : $movie_data['thumb_url'];
         return $movie_data;
     }
 
+    public function grab_image($file_url, $save_to = null)
+    {
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $file_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 140);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.16");
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        return $output = curl_exec($ch);
+        // $file = fopen($save_to, "w+");
+        // fputs($file, $output);
+        // fclose($file);
+    }
+
     private function save_image_from_url($url)
     {
-        $url = str_replace('https://', 'http://', $url);
-        $img_name = pathinfo($url)['filename'].'.webp';
+        // $url = str_replace('https://', 'http://', $url);
+        $img_name = pathinfo($url)['filename'] . '.webp';
         if ($this->check_duplicate_img($img_name, 'images')) {
             return 'upload/images/' . $img_name;
         }
-        $imageResize  = Image::make($url)->encode('webp',70);
+        $content = $this->grab_image($url);
+        $imageResize  = Image::make($content)->encode('webp', 70);
         $imageWidth = $imageResize->width();
         $imageHeight = $imageResize->height();
-        if($imageWidth > 1024 || $imageHeight > 1024) {
-            if($imageWidth > $imageHeight) {
-                $imageResize->resize(1024,null,function($constraint){
+        if ($imageWidth > 1024 || $imageHeight > 1024) {
+            if ($imageWidth > $imageHeight) {
+                $imageResize->resize(1024, null, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
-            }
-            else {
-                $imageResize->resize(null, 1024, function ($constraint) {
+            } else {
+                $imageResize->resize(null, 512, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
             }
         }
         $destinationPath = public_path('upload/images/');
-        $imageResize->save($destinationPath. $img_name);
+        $imageResize->save($destinationPath . $img_name);
         if ($imageResize) {
             return 'upload/images/' . $img_name;
         } else {
@@ -470,7 +492,7 @@ class CrawlOphimController extends MainAdminController
             $data = $response->items;
             foreach ($data as $item) {
                 // $movie_update_date = DateTime::createFromFormat('Y-m-d\TH:i:s.vp', $item->modified->time)->format('d');
-                $movie_update_date =explode("-",explode("T", $item->modified->time)[0])[2];
+                $movie_update_date = explode("-", explode("T", $item->modified->time)[0])[2];
                 if (intval($movie_update_date) === intval($today)) {
                     $film_today++;
                 } else {
@@ -479,8 +501,7 @@ class CrawlOphimController extends MainAdminController
             }
             if ($istart === true) {
                 $page += 1;
-            }
-            else {
+            } else {
                 break;
             }
         }
